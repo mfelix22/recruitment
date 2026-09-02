@@ -29,9 +29,7 @@ class ApplicationController extends Controller
     /** Applicant: view one application detail */
     public function show(Application $application)
     {
-        if ($application->applicant_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('view', $application);
 
         $application->load('jobPosting');
 
@@ -109,9 +107,7 @@ class ApplicationController extends Controller
     /** HRD: view applicant detail */
     public function employerShow(Application $application)
     {
-        if ($application->jobPosting->employer_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('viewEmployer', $application);
 
         $application->load([
             'applicant.applicantProfile.address',
@@ -128,9 +124,7 @@ class ApplicationController extends Controller
     /** HRD: update application status */
     public function updateStatus(Request $request, Application $application)
     {
-        if ($application->jobPosting->employer_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('update', $application);
 
         $validated = $request->validate([
             'status'             => ['required', 'in:' . implode(',', Application::STATUSES)],
@@ -173,9 +167,7 @@ class ApplicationController extends Controller
     /** HRD: update status via AJAX (Kanban drag) */
     public function updateStatusAjax(Request $request, Application $application)
     {
-        if ($application->jobPosting->employer_id !== auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $application);
 
         $validated = $request->validate([
             'status' => ['required', 'in:' . implode(',', Application::STATUSES)],
@@ -205,9 +197,7 @@ class ApplicationController extends Controller
     /** HRD: download applicant profile as PDF */
     public function downloadPdf(Application $application)
     {
-        if ($application->jobPosting->employer_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('downloadPdf', $application);
 
         $application->load([
             'applicant.applicantProfile.address',

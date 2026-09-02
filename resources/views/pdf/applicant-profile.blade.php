@@ -537,9 +537,10 @@
                             <td>{{ $lang->language }}</td>
                             @foreach (['S. Baik', 'Baik', 'Cukup', 'Kurang'] as $lv)
                                 <td style="text-align:center;">{{ $lang->written_level === $lv ? '✓' : '' }}</td>
-                                @endforeach@foreach (['S. Baik', 'Baik', 'Cukup', 'Kurang'] as $lv)
-                                    <td style="text-align:center;">{{ $lang->spoken_level === $lv ? '✓' : '' }}</td>
-                                @endforeach
+                            @endforeach
+                            @foreach (['S. Baik', 'Baik', 'Cukup', 'Kurang'] as $lv)
+                                <td style="text-align:center;">{{ $lang->spoken_level === $lv ? '✓' : '' }}</td>
+                            @endforeach
                         </tr>
                     @endforeach
                 </tbody>

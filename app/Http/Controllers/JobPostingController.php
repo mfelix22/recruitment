@@ -104,7 +104,7 @@ class JobPostingController extends Controller
     /** HRD: show edit form */
     public function edit(JobPosting $lowongan)
     {
-        $this->authorizeOwner($lowongan);
+        $this->authorize('update', $lowongan);
 
         return view('hrd.lowongan.edit', [
             'job'              => $lowongan,
@@ -117,7 +117,7 @@ class JobPostingController extends Controller
     /** HRD: save edits */
     public function update(Request $request, JobPosting $lowongan)
     {
-        $this->authorizeOwner($lowongan);
+        $this->authorize('update', $lowongan);
 
         $validated = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
@@ -145,17 +145,10 @@ class JobPostingController extends Controller
     /** HRD: delete job posting */
     public function destroy(JobPosting $lowongan)
     {
-        $this->authorizeOwner($lowongan);
+        $this->authorize('delete', $lowongan);
         $lowongan->delete();
 
         return redirect()->route('employer.lowongan.index')
             ->with('success', 'Lowongan berhasil dihapus.');
-    }
-
-    private function authorizeOwner(JobPosting $job): void
-    {
-        if ($job->employer_id !== auth()->id()) {
-            abort(403);
-        }
     }
 }
