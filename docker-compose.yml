@@ -4,7 +4,7 @@ services:
 
   # ─── Laravel App (pre-built image from GHCR) ───────────────────────────────────
   app:
-    image: ghcr.io/mfelix22/recruitment:main
+    image: ghcr.io/mfelix22/recruitment:latest
     pull_policy: always
     container_name: recruitment_app
     restart: unless-stopped
