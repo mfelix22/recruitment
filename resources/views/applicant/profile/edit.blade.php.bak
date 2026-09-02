@@ -1,0 +1,1046 @@
+<x-layouts.applicant>
+    <x-slot name="heading">Data Diri Lengkap</x-slot>
+    <div class="py-8">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            @if (session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('warning'))
+                @php
+                    $p = auth()->user()->applicantProfile;
+                    $missing = [];
+                    if (!$p || !$p->blood_type) {
+                        $missing[] = 'Golongan darah';
+                    }
+                    if (!$p || !$p->emergency_contact_name) {
+                        $missing[] = 'Kontak darurat';
+                    }
+                    if (!$p || !$p->address()->exists()) {
+                        $missing[] = 'Alamat tinggal';
+                    }
+                    if (!$p || !$p->educations()->exists()) {
+                        $missing[] = 'Riwayat pendidikan';
+                    }
+                @endphp
+                <div class="bg-amber-50 border border-amber-300 text-amber-900 px-5 py-4 rounded-xl">
+                    <p class="font-semibold text-sm mb-2">⚠️ Profil belum lengkap — harap isi data berikut sebelum
+                        melamar:</p>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        @foreach ($missing as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data"
+                class="space-y-6">
+                @csrf
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- A. IDENTITAS DIRI --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">A. Identitas Diri</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        {{-- Nama Lengkap --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name', auth()->user()->name) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('name') border-red-400 @enderror"
+                                required>
+                            @error('name')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- NIK --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">NIK (KTP) <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="nik" maxlength="16" value="{{ old('nik', $profile?->nik) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('nik') border-red-400 @enderror"
+                                required>
+                            @error('nik')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Nomor HP --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nomor HP / Telepon <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="phone" value="{{ old('phone', $profile?->phone) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('phone') border-red-400 @enderror"
+                                required>
+                            @error('phone')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Tempat Lahir --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tempat Lahir <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="place_of_birth"
+                                value="{{ old('place_of_birth', $profile?->place_of_birth) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('place_of_birth') border-red-400 @enderror"
+                                required>
+                            @error('place_of_birth')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Tanggal Lahir --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Lahir <span
+                                    class="text-red-500">*</span></label>
+                            <input type="date" name="date_of_birth"
+                                value="{{ old('date_of_birth', $profile?->date_of_birth?->format('Y-m-d')) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('date_of_birth') border-red-400 @enderror"
+                                required>
+                            @error('date_of_birth')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Jenis Kelamin --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Jenis Kelamin <span
+                                    class="text-red-500">*</span></label>
+                            <select name="gender"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('gender') border-red-400 @enderror"
+                                required>
+                                <option value="">-- Pilih --</option>
+                                @foreach (['Laki-laki', 'Perempuan'] as $g)
+                                    <option value="{{ $g }}" @selected(old('gender', $profile?->gender) === $g)>
+                                        {{ $g }}</option>
+                                @endforeach
+                            </select>
+                            @error('gender')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Agama --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Agama <span
+                                    class="text-red-500">*</span></label>
+                            <select name="religion"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('religion') border-red-400 @enderror"
+                                required>
+                                <option value="">-- Pilih --</option>
+                                @foreach ($religions as $r)
+                                    <option value="{{ $r }}" @selected(old('religion', $profile?->religion) === $r)>
+                                        {{ $r }}</option>
+                                @endforeach
+                            </select>
+                            @error('religion')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Status Pernikahan --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status Pernikahan <span
+                                    class="text-red-500">*</span></label>
+                            <select name="marital_status"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('marital_status') border-red-400 @enderror"
+                                required>
+                                <option value="">-- Pilih --</option>
+                                @foreach (['Belum Menikah', 'Menikah', 'Cerai Hidup', 'Cerai Mati'] as $m)
+                                    <option value="{{ $m }}" @selected(old('marital_status', $profile?->marital_status) === $m)>
+                                        {{ $m }}</option>
+                                @endforeach
+                            </select>
+                            @error('marital_status')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Kewarganegaraan --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kewarganegaraan <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="nationality"
+                                value="{{ old('nationality', $profile?->nationality ?? 'Indonesia') }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                required>
+                        </div>
+
+                        {{-- Golongan Darah --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Golongan Darah <span
+                                    class="text-red-500">*</span></label>
+                            <select name="blood_type"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('blood_type') border-red-400 @enderror"
+                                required>
+                                <option value="">-- Pilih --</option>
+                                @foreach (['A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bt)
+                                    <option value="{{ $bt }}" @selected(old('blood_type', $profile?->blood_type) === $bt)>
+                                        {{ $bt }}</option>
+                                @endforeach
+                            </select>
+                            @error('blood_type')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Tinggi Badan --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tinggi Badan (cm) <span
+                                    class="text-red-500">*</span></label>
+                            <input type="number" name="height_cm" min="50" max="250"
+                                value="{{ old('height_cm', $profile?->height_cm) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('height_cm') border-red-400 @enderror"
+                                required>
+                            @error('height_cm')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Berat Badan --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Berat Badan (kg) <span
+                                    class="text-red-500">*</span></label>
+                            <input type="number" name="weight_kg" min="20" max="300"
+                                value="{{ old('weight_kg', $profile?->weight_kg) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('weight_kg') border-red-400 @enderror"
+                                required>
+                            @error('weight_kg')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- No. KTP + Tempat Terbit --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">No. KTP</label>
+                            <input type="text" value="{{ old('nik', $profile?->nik) }}"
+                                maxlength="16"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                                readonly>
+                            <p class="text-xs text-gray-400 mt-1">Sama dengan NIK di atas</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tempat Terbit KTP</label>
+                            <input type="text" name="ktp_issued_place"
+                                value="{{ old('ktp_issued_place', $profile?->ktp_issued_place) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+
+                        {{-- No. SIM + Tempat Terbit --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">No. SIM</label>
+                            <input type="text" name="sim_no" value="{{ old('sim_no', $profile?->sim_no) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tempat Terbit SIM</label>
+                            <input type="text" name="sim_issued_place"
+                                value="{{ old('sim_issued_place', $profile?->sim_issued_place) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+
+                        {{-- Foto --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Foto (maks 2MB)</label>
+                            @if ($profile?->photo)
+                                <img src="{{ Storage::url($profile->photo) }}" alt="Foto"
+                                    class="w-24 h-24 object-cover rounded mb-2">
+                            @endif
+                            <input type="file" name="photo" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 @error('photo') border-red-400 @enderror">
+                            @error('photo')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- B. ALAMAT --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">B. Alamat Domisili</h3>
+
+                    @php $addr = $profile?->address; @endphp
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Jalan / No. Rumah <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="street" value="{{ old('street', $addr?->street) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('street') border-red-400 @enderror"
+                                required>
+                            @error('street')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">RT / RW</label>
+                            <input type="text" name="rt_rw" placeholder="001/002"
+                                value="{{ old('rt_rw', $addr?->rt_rw) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kelurahan / Desa</label>
+                            <input type="text" name="kelurahan" value="{{ old('kelurahan', $addr?->kelurahan) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                            <input type="text" name="kecamatan" value="{{ old('kecamatan', $addr?->kecamatan) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kab. / Kota <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="kabupaten" value="{{ old('kabupaten', $addr?->kabupaten) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm @error('kabupaten') border-red-400 @enderror"
+                                required>
+                            @error('kabupaten')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Provinsi <span
+                                    class="text-red-500">*</span></label>
+                            <select name="province"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm @error('province') border-red-400 @enderror"
+                                required>
+                                <option value="">-- Pilih Provinsi --</option>
+                                @foreach ($provinces as $prov)
+                                    <option value="{{ $prov }}" @selected(old('province', $addr?->province) === $prov)>
+                                        {{ $prov }}</option>
+                                @endforeach
+                            </select>
+                            @error('province')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kode Pos</label>
+                            <input type="text" name="postal_code" maxlength="10"
+                                value="{{ old('postal_code', $addr?->postal_code) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status Rumah</label>
+                            <select name="house_status"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                                <option value="">-- Pilih --</option>
+                                @foreach (['Pribadi', 'Orang Tua', 'Saudara', 'Kontrak', 'Kost'] as $hs)
+                                    <option value="{{ $hs }}" @selected(old('house_status', $profile?->house_status) === $hs)>
+                                        {{ $hs }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex items-center mt-6">
+                            <input type="hidden" name="willing_to_relocate" value="0">
+                            <input type="checkbox" name="willing_to_relocate" value="1" id="relocate"
+                                @checked(old('willing_to_relocate', $profile?->willing_to_relocate)) class="w-4 h-4 text-indigo-600 border-gray-300 rounded">
+                            <label for="relocate" class="ml-2 block text-sm text-gray-700">Bersedia pindah domisili /
+                                ditempatkan di luar kota</label>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- C. ANGGOTA KELUARGA --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">C. Keluarga</h3>
+
+                    {{-- Tanggungan Lain --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tanggungan Lain (selain suami/istri
+                            &amp; anak)</label>
+                        <input type="text" name="other_dependents"
+                            value="{{ old('other_dependents', $profile?->other_dependents) }}"
+                            placeholder="mis. Orang tua (2 orang)"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                    </div>
+
+                    {{-- Keluarga Inti (Suami/Istri/Anak) --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-700 text-sm">Keluarga Inti (Suami / Istri / Anak)</h4>
+                            <button type="button" onclick="addFamilyRow('immediate')"
+                                class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">+
+                                Tambah</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs border border-gray-200 rounded">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-2 py-2 text-left border">Hubungan</th>
+                                        <th class="px-2 py-2 text-left border">Nama</th>
+                                        <th class="px-2 py-2 text-left border">L/P</th>
+                                        <th class="px-2 py-2 text-left border">Tempat/Tgl Lahir</th>
+                                        <th class="px-2 py-2 text-left border">Pendidikan</th>
+                                        <th class="px-2 py-2 text-left border">Pekerjaan</th>
+                                        <th class="px-2 py-2 border"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="immediate-family-body">
+                                    @foreach ($profile?->immediateFamilyMembers ?? [] as $i => $fm)
+                                        <tr class="family-row-immediate">
+                                            <input type="hidden" name="family[{{ $i }}][family_type]"
+                                                value="immediate">
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $i }}][relation]"
+                                                    value="{{ $fm->relation }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"
+                                                    placeholder="Istri/Suami/Anak"></td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $i }}][name]"
+                                                    value="{{ $fm->name }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1">
+                                                <select name="family[{{ $i }}][gender]"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                    <option value="L" @selected($fm->gender === 'L')>L</option>
+                                                    <option value="P" @selected($fm->gender === 'P')>P</option>
+                                                </select>
+                                            </td>
+                                            <td class="border px-1 py-1">
+                                                <input type="text"
+                                                    name="family[{{ $i }}][place_of_birth]"
+                                                    value="{{ $fm->place_of_birth }}" placeholder="Tempat"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded mb-1">
+                                                <input type="date"
+                                                    name="family[{{ $i }}][date_of_birth]"
+                                                    value="{{ $fm->date_of_birth?->format('Y-m-d') }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                            </td>
+                                            <td class="border px-1 py-1">
+                                                <select name="family[{{ $i }}][education]"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                    <option value="">-</option>
+                                                    @foreach ($educationLevels as $el)
+                                                        <option value="{{ $el }}"
+                                                            @selected($fm->education === $el)>{{ $el }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $i }}][occupation]"
+                                                    value="{{ $fm->occupation }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><button type="button"
+                                                    onclick="this.closest('tr').remove()"
+                                                    class="text-red-500 text-xs">✕</button></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Keluarga Asal (Orang Tua / Saudara) --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-700 text-sm">Keluarga Asal (Ayah / Ibu / Saudara)</h4>
+                            <button type="button" onclick="addFamilyRow('origin')"
+                                class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">+
+                                Tambah</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs border border-gray-200 rounded">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-2 py-2 text-left border">Hubungan</th>
+                                        <th class="px-2 py-2 text-left border">Nama</th>
+                                        <th class="px-2 py-2 text-left border">L/P</th>
+                                        <th class="px-2 py-2 text-left border">Tempat/Tgl Lahir</th>
+                                        <th class="px-2 py-2 text-left border">Pendidikan</th>
+                                        <th class="px-2 py-2 text-left border">Pekerjaan</th>
+                                        <th class="px-2 py-2 border"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="origin-family-body">
+                                    @php $imCount = count($profile?->immediateFamilyMembers ?? []); @endphp
+                                    @foreach ($profile?->originFamilyMembers ?? [] as $j => $fm)
+                                        @php $idx = $imCount + $j; @endphp
+                                        <tr class="family-row-origin">
+                                            <input type="hidden" name="family[{{ $idx }}][family_type]"
+                                                value="origin">
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $idx }}][relation]"
+                                                    value="{{ $fm->relation }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"
+                                                    placeholder="Ayah/Ibu/Kakak"></td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $idx }}][name]"
+                                                    value="{{ $fm->name }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1">
+                                                <select name="family[{{ $idx }}][gender]"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                    <option value="L" @selected($fm->gender === 'L')>L</option>
+                                                    <option value="P" @selected($fm->gender === 'P')>P</option>
+                                                </select>
+                                            </td>
+                                            <td class="border px-1 py-1">
+                                                <input type="text"
+                                                    name="family[{{ $idx }}][place_of_birth]"
+                                                    value="{{ $fm->place_of_birth }}" placeholder="Tempat"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded mb-1">
+                                                <input type="date"
+                                                    name="family[{{ $idx }}][date_of_birth]"
+                                                    value="{{ $fm->date_of_birth?->format('Y-m-d') }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                            </td>
+                                            <td class="border px-1 py-1">
+                                                <select name="family[{{ $idx }}][education]"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                    <option value="">-</option>
+                                                    @foreach ($educationLevels as $el)
+                                                        <option value="{{ $el }}"
+                                                            @selected($fm->education === $el)>{{ $el }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="family[{{ $idx }}][occupation]"
+                                                    value="{{ $fm->occupation }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><button type="button"
+                                                    onclick="this.closest('tr').remove()"
+                                                    class="text-red-500 text-xs">✕</button></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- D. RIWAYAT PENDIDIKAN FORMAL --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h3 class="text-lg font-bold text-indigo-700">D. Riwayat Pendidikan Formal</h3>
+                        <a href="{{ route('applicant.education.create') }}"
+                            class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">+ Tambah
+                            Pendidikan</a>
+                    </div>
+                    @if ($profile?->educations->count())
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm border border-gray-200 rounded">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left border">Tingkat</th>
+                                        <th class="px-3 py-2 text-left border">Nama Sekolah / Perguruan Tinggi</th>
+                                        <th class="px-3 py-2 text-left border">Jurusan</th>
+                                        <th class="px-3 py-2 text-left border">Tahun</th>
+                                        <th class="px-3 py-2 text-left border">IPK / Nilai</th>
+                                        <th class="px-3 py-2 border">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($profile->educations as $edu)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="border px-3 py-2">{{ $edu->level }}</td>
+                                            <td class="border px-3 py-2">{{ $edu->institution }}</td>
+                                            <td class="border px-3 py-2">{{ $edu->major ?? '-' }}</td>
+                                            <td class="border px-3 py-2">{{ $edu->year_start }} –
+                                                {{ $edu->year_end ?? 'skr' }}</td>
+                                            <td class="border px-3 py-2">{{ $edu->gpa ?? '-' }}</td>
+                                            <td class="border px-3 py-2 text-center">
+                                                <a href="{{ route('applicant.education.edit', $edu) }}"
+                                                    class="text-indigo-600 hover:underline text-xs mr-2">Ubah</a>
+                                                <a href="{{ route('applicant.education.index') }}"
+                                                    class="text-red-500 hover:underline text-xs">Hapus</a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-400 italic">Belum ada riwayat pendidikan. Klik "+ Tambah
+                            Pendidikan".</p>
+                    @endif
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- E. PENDIDIKAN NON-FORMAL / PELATIHAN --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h3 class="text-lg font-bold text-indigo-700">E. Pendidikan Non-Formal / Pelatihan</h3>
+                        <button type="button" onclick="addTrainingRow()"
+                            class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">+
+                            Tambah</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs border border-gray-200 rounded">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-2 text-left border">Nama Pelatihan / Kursus</th>
+                                    <th class="px-2 py-2 text-left border">Penyelenggara</th>
+                                    <th class="px-2 py-2 text-left border">Tempat</th>
+                                    <th class="px-2 py-2 text-left border">Tahun</th>
+                                    <th class="px-2 py-2 text-left border">Keterangan</th>
+                                    <th class="px-2 py-2 border"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainings-body">
+                                @foreach ($profile?->trainings ?? [] as $i => $tr)
+                                    <tr>
+                                        <td class="border px-1 py-1"><input type="text"
+                                                name="trainings[{{ $i }}][name]"
+                                                value="{{ $tr->name }}"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                        <td class="border px-1 py-1"><input type="text"
+                                                name="trainings[{{ $i }}][organizer]"
+                                                value="{{ $tr->organizer }}"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                        <td class="border px-1 py-1"><input type="text"
+                                                name="trainings[{{ $i }}][place]"
+                                                value="{{ $tr->place }}"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                        <td class="border px-1 py-1"><input type="number"
+                                                name="trainings[{{ $i }}][year]"
+                                                value="{{ $tr->year }}"
+                                                class="w-20 text-xs border-0 focus:ring-1 rounded"></td>
+                                        <td class="border px-1 py-1"><input type="text"
+                                                name="trainings[{{ $i }}][notes]"
+                                                value="{{ $tr->notes }}"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                        <td class="border px-1 py-1"><button type="button"
+                                                onclick="this.closest('tr').remove()"
+                                                class="text-red-500 text-xs">✕</button></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- F. KEMAMPUAN BAHASA --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h3 class="text-lg font-bold text-indigo-700">F. Kemampuan Bahasa</h3>
+                        <button type="button" onclick="addLanguageRow()"
+                            class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">+
+                            Tambah</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs border border-gray-200 rounded">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-2 text-left border">Bahasa</th>
+                                    <th class="px-2 py-2 text-left border">Kemampuan Tulisan</th>
+                                    <th class="px-2 py-2 text-left border">Kemampuan Lisan</th>
+                                    <th class="px-2 py-2 border"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="languages-body">
+                                @foreach ($profile?->languageSkills ?? [] as $i => $ls)
+                                    <tr>
+                                        <td class="border px-1 py-1"><input type="text"
+                                                name="languages[{{ $i }}][language]"
+                                                value="{{ $ls->language }}"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded"
+                                                placeholder="Indonesia / Inggris / ..."></td>
+                                        <td class="border px-1 py-1">
+                                            <select name="languages[{{ $i }}][written_level]"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                @foreach ($langLevels as $ll)
+                                                    <option value="{{ $ll }}"
+                                                        @selected($ls->written_level === $ll)>{{ $ll }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td class="border px-1 py-1">
+                                            <select name="languages[{{ $i }}][spoken_level]"
+                                                class="w-full text-xs border-0 focus:ring-1 rounded">
+                                                @foreach ($langLevels as $ll)
+                                                    <option value="{{ $ll }}"
+                                                        @selected($ls->spoken_level === $ll)>{{ $ll }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td class="border px-1 py-1"><button type="button"
+                                                onclick="this.closest('tr').remove()"
+                                                class="text-red-500 text-xs">✕</button></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- G. RIWAYAT PEKERJAAN --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h3 class="text-lg font-bold text-indigo-700">G. Riwayat Pekerjaan</h3>
+                        <a href="{{ route('applicant.work.create') }}"
+                            class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">+ Tambah
+                            Pekerjaan</a>
+                    </div>
+                    @if ($profile?->workExperiences->count())
+                        <div class="space-y-3">
+                            @foreach ($profile->workExperiences as $we)
+                                <div class="border rounded-lg p-4 text-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-semibold text-gray-800">{{ $we->position }} <span
+                                                    class="text-gray-500 font-normal">di</span> {{ $we->company }}
+                                            </p>
+                                            <p class="text-gray-500 text-xs">{{ $we->start_date?->format('M Y') }} –
+                                                {{ $we->still_working ? 'sekarang' : $we->end_date?->format('M Y') ?? '-' }}
+                                            </p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <a href="{{ route('applicant.work.edit', $we) }}"
+                                                class="text-indigo-600 hover:underline text-xs">Ubah</a>
+                                            <a href="{{ route('applicant.work.index') }}"
+                                                class="text-red-500 hover:underline text-xs">Hapus</a>
+                                        </div>
+                                    </div>
+                                    @if ($we->reason_for_leaving)
+                                        <p class="text-xs text-gray-400 mt-1">Alasan berhenti:
+                                            {{ $we->reason_for_leaving }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-400 italic">Belum ada riwayat pekerjaan. Klik "+ Tambah Pekerjaan".
+                        </p>
+                    @endif
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- H. MINAT DAN KONSEP PRIBADI --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">H. Minat dan Konsep Pribadi</h3>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Hobi / Kegemaran</label>
+                        <input type="text" name="hobbies" value="{{ old('hobbies', $profile?->hobbies) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kelebihan / Kekuatan Diri</label>
+                        <textarea name="strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">{{ old('strengths', $profile?->strengths) }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kelemahan / Kekurangan Diri</label>
+                        <textarea name="weaknesses" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">{{ old('weaknesses', $profile?->weaknesses) }}</textarea>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- I. AKTIVITAS SOSIAL --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">I. Aktivitas Sosial & Referensi</h3>
+
+                    {{-- Organizational Activities --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Aktivitas / Organisasi</label>
+                        <textarea name="organizational_activities" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                            placeholder="Sebutkan organisasi yang pernah / sedang diikuti beserta jabatan...">{{ old('organizational_activities', $profile?->organizational_activities) }}</textarea>
+                    </div>
+
+                    {{-- International Travel --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Perjalanan ke Luar Negeri</label>
+                        <input type="text" name="international_travel"
+                            value="{{ old('international_travel', $profile?->international_travel) }}"
+                            placeholder="mis. Malaysia (2022), Singapura (2023)"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                    </div>
+
+                    {{-- References --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-700 text-sm">Referensi (maks. 3 orang)</h4>
+                            <button type="button" onclick="addReferenceRow()"
+                                class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">+
+                                Tambah</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs border border-gray-200 rounded">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-2 py-2 text-left border">Nama</th>
+                                        <th class="px-2 py-2 text-left border">Alamat &amp; Telepon Tempat Kerja</th>
+                                        <th class="px-2 py-2 text-left border">Jabatan</th>
+                                        <th class="px-2 py-2 text-left border">Hubungan</th>
+                                        <th class="px-2 py-2 border"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="references-body">
+                                    @foreach ($profile?->references ?? [] as $i => $ref)
+                                        <tr>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="references[{{ $i }}][name]"
+                                                    value="{{ $ref->name }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="references[{{ $i }}][work_address]"
+                                                    value="{{ $ref->work_address }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="references[{{ $i }}][position]"
+                                                    value="{{ $ref->position }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><input type="text"
+                                                    name="references[{{ $i }}][relation]"
+                                                    value="{{ $ref->relation }}"
+                                                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+                                            <td class="border px-1 py-1"><button type="button"
+                                                    onclick="this.closest('tr').remove()"
+                                                    class="text-red-500 text-xs">✕</button></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════ --}}
+                {{-- J. LAIN-LAIN --}}
+                {{-- ══════════════════════════════════════════════════════ --}}
+                <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">J. Lain-lain</h3>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Riwayat Penyakit yang Pernah
+                            Diderita</label>
+                        <textarea name="past_illness" rows="2"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                            placeholder="Sebutkan jika ada, atau tulis 'Tidak ada'">{{ old('past_illness', $profile?->past_illness) }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kontak Darurat – Nama <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="emergency_contact_name"
+                                value="{{ old('emergency_contact_name', $profile?->emergency_contact_name) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm @error('emergency_contact_name') border-red-400 @enderror"
+                                required>
+                            @error('emergency_contact_name')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">No. Telepon <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="emergency_contact_phone"
+                                value="{{ old('emergency_contact_phone', $profile?->emergency_contact_phone) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm @error('emergency_contact_phone') border-red-400 @enderror"
+                                required>
+                            @error('emergency_contact_phone')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Hubungan <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="emergency_contact_relation"
+                                placeholder="mis. Orang Tua / Suami / Istri"
+                                value="{{ old('emergency_contact_relation', $profile?->emergency_contact_relation) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm @error('emergency_contact_relation') border-red-400 @enderror"
+                                required>
+                            @error('emergency_contact_relation')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Declaration --}}
+                    <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+                        <p class="font-semibold mb-2">Pernyataan:</p>
+                        <p>Dengan ini saya menyatakan bahwa seluruh informasi yang saya berikan dalam formulir ini
+                            adalah benar dan dapat dipertanggungjawabkan. Apabila di kemudian hari terdapat
+                            ketidakbenaran dalam informasi tersebut, saya bersedia menerima segala konsekuensinya.</p>
+                    </div>
+                </div>
+
+                {{-- Submit Button --}}
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition">
+                        Simpan Formulir
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    {{-- ══ Dynamic Row Templates ══ --}}
+    <template id="tpl-family-immediate">
+        <tr>
+            <input type="hidden" name="__IDX__" value="immediate">
+            <td class="border px-1 py-1"><input type="text" name="__NAME_RELATION__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded" placeholder="Istri/Suami/Anak"></td>
+            <td class="border px-1 py-1"><input type="text" name="__NAME_NAME__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1">
+                <select name="__NAME_GENDER__" class="w-full text-xs border-0 focus:ring-1 rounded">
+                    <option value="L">L</option>
+                    <option value="P">P</option>
+                </select>
+            </td>
+            <td class="border px-1 py-1">
+                <input type="text" name="__NAME_POB__" placeholder="Tempat"
+                    class="w-full text-xs border-0 focus:ring-1 rounded mb-1">
+                <input type="date" name="__NAME_DOB__" class="w-full text-xs border-0 focus:ring-1 rounded">
+            </td>
+            <td class="border px-1 py-1">
+                <select name="__NAME_EDU__" class="w-full text-xs border-0 focus:ring-1 rounded">
+                    <option value="">-</option>
+                    @foreach ($educationLevels as $el)
+                        <option value="{{ $el }}">{{ $el }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td class="border px-1 py-1"><input type="text" name="__NAME_OCC__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><button type="button" onclick="this.closest('tr').remove()"
+                    class="text-red-500 text-xs">✕</button></td>
+        </tr>
+    </template>
+
+    <template id="tpl-family-origin">
+        <tr>
+            <input type="hidden" name="__IDX__" value="origin">
+            <td class="border px-1 py-1"><input type="text" name="__NAME_RELATION__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded" placeholder="Ayah/Ibu/Kakak"></td>
+            <td class="border px-1 py-1"><input type="text" name="__NAME_NAME__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1">
+                <select name="__NAME_GENDER__" class="w-full text-xs border-0 focus:ring-1 rounded">
+                    <option value="L">L</option>
+                    <option value="P">P</option>
+                </select>
+            </td>
+            <td class="border px-1 py-1">
+                <input type="text" name="__NAME_POB__" placeholder="Tempat"
+                    class="w-full text-xs border-0 focus:ring-1 rounded mb-1">
+                <input type="date" name="__NAME_DOB__" class="w-full text-xs border-0 focus:ring-1 rounded">
+            </td>
+            <td class="border px-1 py-1">
+                <select name="__NAME_EDU__" class="w-full text-xs border-0 focus:ring-1 rounded">
+                    <option value="">-</option>
+                    @foreach ($educationLevels as $el)
+                        <option value="{{ $el }}">{{ $el }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td class="border px-1 py-1"><input type="text" name="__NAME_OCC__"
+                    class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><button type="button" onclick="this.closest('tr').remove()"
+                    class="text-red-500 text-xs">✕</button></td>
+        </tr>
+    </template>
+
+    @push('scripts')
+        <script>
+            // ── helpers ──────────────────────────────────────────────────────
+            function nextFamilyIndex() {
+                return document.querySelectorAll('[name^="family["]').length;
+            }
+
+            function addFamilyRow(type) {
+                const tpl = document.getElementById('tpl-family-' + type);
+                const tbody = document.getElementById(type + '-family-body');
+                const idx = nextFamilyIndex();
+                let html = tpl.innerHTML
+                    .replace(/__IDX__/g, `family[${idx}][family_type]`)
+                    .replace(/__NAME_RELATION__/g, `family[${idx}][relation]`)
+                    .replace(/__NAME_NAME__/g, `family[${idx}][name]`)
+                    .replace(/__NAME_GENDER__/g, `family[${idx}][gender]`)
+                    .replace(/__NAME_POB__/g, `family[${idx}][place_of_birth]`)
+                    .replace(/__NAME_DOB__/g, `family[${idx}][date_of_birth]`)
+                    .replace(/__NAME_EDU__/g, `family[${idx}][education]`)
+                    .replace(/__NAME_OCC__/g, `family[${idx}][occupation]`);
+                const tmp = document.createElement('tbody');
+                tmp.innerHTML = html;
+                tbody.appendChild(tmp.firstElementChild);
+            }
+
+            function addTrainingRow() {
+                const tbody = document.getElementById('trainings-body');
+                const idx = tbody.querySelectorAll('tr').length;
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    `
+            <td class="border px-1 py-1"><input type="text" name="trainings[${idx}][name]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="trainings[${idx}][organizer]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="trainings[${idx}][place]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="number" name="trainings[${idx}][year]" class="w-20 text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="trainings[${idx}][notes]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 text-xs">✕</button></td>`;
+                tbody.appendChild(tr);
+            }
+
+            function addLanguageRow() {
+                const tbody = document.getElementById('languages-body');
+                const idx = tbody.querySelectorAll('tr').length;
+                const levels = @json($langLevels);
+                const opts = levels.map(l => `<option value="${l}">${l}</option>`).join('');
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    `
+            <td class="border px-1 py-1"><input type="text" name="languages[${idx}][language]" placeholder="Indonesia / Inggris / ..." class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><select name="languages[${idx}][written_level]" class="w-full text-xs border-0 focus:ring-1 rounded">${opts}</select></td>
+            <td class="border px-1 py-1"><select name="languages[${idx}][spoken_level]" class="w-full text-xs border-0 focus:ring-1 rounded">${opts}</select></td>
+            <td class="border px-1 py-1"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 text-xs">✕</button></td>`;
+                tbody.appendChild(tr);
+            }
+
+            function addReferenceRow() {
+                const tbody = document.getElementById('references-body');
+                if (tbody.querySelectorAll('tr').length >= 3) {
+                    alert('Maksimal 3 referensi.');
+                    return;
+                }
+                const idx = tbody.querySelectorAll('tr').length;
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    `
+            <td class="border px-1 py-1"><input type="text" name="references[${idx}][name]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="references[${idx}][work_address]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="references[${idx}][position]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><input type="text" name="references[${idx}][relation]" class="w-full text-xs border-0 focus:ring-1 rounded"></td>
+            <td class="border px-1 py-1"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 text-xs">✕</button></td>`;
+                tbody.appendChild(tr);
+            }
+        </script>
+    @endpush
+
+</x-layouts.applicant>
