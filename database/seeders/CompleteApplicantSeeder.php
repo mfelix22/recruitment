@@ -112,7 +112,7 @@ class CompleteApplicantSeeder extends Seeder
                 'end_date'           => '2022-12-31',
                 'still_working'      => false,
                 'job_description'    => 'Mengelola dokumen dan administrasi harian',
-                'salary_total'       => 4500000,
+                'salary_total'       => '4500000',
                 'facilities'         => 'BPJS, thr, bonus',
                 'supervisor_name'    => 'Pak Joko',
                 'subordinates_count' => 0,
@@ -195,7 +195,7 @@ class CompleteApplicantSeeder extends Seeder
                 'name'       => 'Pelatihan Manajemen Waktu',
                 'organizer'  => 'Lembaga Pelatihan A',
                 'place'      => 'Semarang',
-                'year'       => 2020,
+                'year'       => '2020',
                 'notes'      => 'Dibiayai perusahaan',
                 'sort_order' => 1,
             ],
@@ -203,7 +203,7 @@ class CompleteApplicantSeeder extends Seeder
                 'name'       => 'Kursus Microsoft Excel Advanced',
                 'organizer'  => 'Lembaga Komputer B',
                 'place'      => 'Semarang',
-                'year'       => 2019,
+                'year'       => '2019',
                 'notes'      => 'Dibiayai sendiri',
                 'sort_order' => 2,
             ],
@@ -230,8 +230,8 @@ class CompleteApplicantSeeder extends Seeder
             [
                 'brand_type' => 'Honda Beat 110',
                 'cc'         => '110',
-                'year'       => 2019,
-                'ownership'  => 'Milik sendiri',
+                'year'       => '2019',
+                'ownership'  => 'Pribadi',
             ],
         ]);
 
