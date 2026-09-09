@@ -37,7 +37,7 @@ class JobPostingSeeder extends Seeder
                 'title'            => 'Teknisi Listrik',
                 'position'         => 'Teknisi',
                 'department'       => 'Teknik & Pemeliharaan',
-                'location'         => 'Solo',
+                'location'         => 'Surabaya',
                 'experience_level' => 'Mid',
                 'experience_years' => '2-4 tahun',
                 'employment_type'  => 'Full Time',
@@ -46,7 +46,7 @@ class JobPostingSeeder extends Seeder
                 'deadline'         => now()->addDays(21)->toDateString(),
                 'is_active'        => true,
                 'job_description'  => "Melakukan pemasangan, pemeliharaan, dan perbaikan instalasi listrik di fasilitas produksi. Memastikan semua instalasi sesuai standar keselamatan yang berlaku.",
-                'requirements'     => "- Pendidikan SMK Teknik Elektro atau sederajat\n- Memiliki sertifikat kompetensi kelistrikan (nilai lebih)\n- Pengalaman minimal 2 tahun sebagai teknisi listrik industri\n- Bersedia bekerja shift\n- Bersedia ditempatkan di Solo",
+                'requirements'     => "- Pendidikan SMK Teknik Elektro atau sederajat\n- Memiliki sertifikat kompetensi kelistrikan (nilai lebih)\n- Pengalaman minimal 2 tahun sebagai teknisi listrik industri\n- Bersedia bekerja shift\n- Bersedia ditempatkan di Surabaya",
             ],
             [
                 'title'            => 'Marketing Executive',
@@ -97,7 +97,7 @@ class JobPostingSeeder extends Seeder
                 'title'            => 'Supervisor Gudang',
                 'position'         => 'Supervisor',
                 'department'       => 'Logistik & Warehouse',
-                'location'         => 'Solo',
+                'location'         => 'Bali',
                 'experience_level' => 'Mid',
                 'experience_years' => '3-5 tahun',
                 'employment_type'  => 'Full Time',
@@ -106,7 +106,7 @@ class JobPostingSeeder extends Seeder
                 'deadline'         => now()->addDays(25)->toDateString(),
                 'is_active'        => true,
                 'job_description'  => "Memimpin operasional gudang meliputi penerimaan, penyimpanan, dan pengiriman barang. Memastikan akurasi stok dan kelancaran proses distribusi ke seluruh cabang.",
-                'requirements'     => "- Pendidikan S1 Manajemen / Logistik / Teknik Industri\n- Pengalaman minimal 3 tahun di bidang warehouse / logistik\n- Menguasai sistem WMS (Warehouse Management System)\n- Mampu memimpin tim minimal 10 orang\n- Bersedia bekerja shift dan ditempatkan di Solo",
+                'requirements'     => "- Pendidikan S1 Manajemen / Logistik / Teknik Industri\n- Pengalaman minimal 3 tahun di bidang warehouse / logistik\n- Menguasai sistem WMS (Warehouse Management System)\n- Mampu memimpin tim minimal 10 orang\n- Bersedia bekerja shift dan ditempatkan di Bali",
             ],
         ];
 
