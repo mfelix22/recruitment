@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\JobPosting;
 use App\Models\SupportingDocument;
-use App\Mail\McuInvitationMail;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use App\Mail\OnboardingInvitationMail;
 use App\Mail\InterviewInvitationMail;
 use App\Http\Controllers\McuResultController;
@@ -22,7 +23,7 @@ class ApplicationController extends Controller
     /** Applicant: list own applications */
     public function index()
     {
-        $applications = Application::where('applicant_id', auth()->id())
+        $applications = Application::where('applicant_id', Auth::id())
             ->with('jobPosting.employer')
             ->latest()
             ->paginate(10);
@@ -43,7 +44,8 @@ class ApplicationController extends Controller
     /** Applicant: submit application */
     public function store(Request $request, JobPosting $jobPosting)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $profile = $user->applicantProfile;
 
         // Check profile completeness inline — stay on the job page
@@ -71,7 +73,7 @@ class ApplicationController extends Controller
         ]);
 
         $application = Application::create([
-            'applicant_id'   => auth()->id(),
+            'applicant_id'   => Auth::id(),
             'job_posting_id' => $jobPosting->id,
             'cover_letter'   => $validated['cover_letter'] ?? null,
             'status'         => 'Menunggu',
@@ -109,7 +111,7 @@ class ApplicationController extends Controller
     public function employerIndex(Request $request)
     {
         $query = Application::whereHas('jobPosting', function ($q) {
-            $q->where('employer_id', auth()->id());
+            $q->where('employer_id', Auth::id());
         })->with(['applicant.applicantProfile', 'jobPosting'])->latest();
 
         if ($request->filled('lowongan')) {
@@ -122,7 +124,7 @@ class ApplicationController extends Controller
 
         $applications = $query->paginate(15)->withQueryString();
 
-        $myJobs = JobPosting::where('employer_id', auth()->id())
+        $myJobs = JobPosting::where('employer_id', Auth::id())
             ->pluck('title', 'id');
 
         $statuses = Application::STATUSES;
@@ -137,7 +139,7 @@ class ApplicationController extends Controller
 
         return Excel::download(
             new ApplicationsExport(
-                employerId: auth()->id(),
+                employerId: Auth::id(),
                 jobPostingId: $request->filled('lowongan') ? (int) $request->lowongan : null,
                 status: $request->filled('status') ? $request->status : null,
             ),
@@ -171,9 +173,14 @@ class ApplicationController extends Controller
             'status'             => ['required', 'in:' . implode(',', Application::STATUSES)],
             'employer_notes'     => ['nullable', 'string', 'max:1000'],
             'interview_at'       => ['nullable', 'date'],
+            'interview_mode'     => ['nullable', 'in:online,offline'],
             'interview_location' => ['nullable', 'string', 'max:500'],
             'interview_notes'    => ['nullable', 'string', 'max:1000'],
         ]);
+
+        if (! array_key_exists('interview_mode', $validated)) {
+            $validated['interview_mode'] = $application->interview_mode ?? 'offline';
+        }
 
         $application->update($validated);
 
@@ -192,11 +199,6 @@ class ApplicationController extends Controller
             if ($validated['status'] === 'Dipanggil Interview' && ! empty($validated['interview_at'])) {
                 Mail::to($application->applicant->email)
                     ->send(new InterviewInvitationMail($application));
-            }
-
-            if ($validated['status'] === 'Menunggu MCU') {
-                Mail::to($application->applicant->email)
-                    ->send(new McuInvitationMail($application));
             }
 
             if ($validated['status'] === 'Onboarding') {
@@ -232,9 +234,6 @@ class ApplicationController extends Controller
                 new ApplicationStatusUpdated($application, $validated['status'])
             );
 
-            if ($validated['status'] === 'Menunggu MCU') {
-                Mail::to($application->applicant->email)->send(new McuInvitationMail($application));
-            }
             if ($validated['status'] === 'Onboarding') {
                 Mail::to($application->applicant->email)->send(new OnboardingInvitationMail($application));
             }
@@ -278,7 +277,7 @@ class ApplicationController extends Controller
     public function kanban()
     {
         $applications = Application::whereHas('jobPosting', function ($q) {
-            $q->where('employer_id', auth()->id());
+            $q->where('employer_id', Auth::id());
         })->with(['applicant', 'jobPosting'])->latest()->get();
 
         // Build ordered columns for all statuses

@@ -25,7 +25,15 @@ class InterviewInvitationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.interview-invitation',
+            view: $this->interviewView(),
         );
+    }
+
+    public function interviewView(): string
+    {
+        return match ($this->application->interview_mode) {
+            'online'  => 'emails.interview-invitation-online',
+            default   => 'emails.interview-invitation-offline',
+        };
     }
 }

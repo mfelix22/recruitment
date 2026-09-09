@@ -35,6 +35,7 @@ class Application extends Model
         'employer_notes',
         'interview_at',
         'interview_location',
+        'interview_mode',
         'interview_notes',
     ];
 

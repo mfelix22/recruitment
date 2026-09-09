@@ -271,10 +271,20 @@
                                         class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Lokasi</label>
-                                    <input type="text" name="interview_location"
+                                    <label class="block text-xs text-gray-500 mb-1">Mode Interview</label>
+                                    <select name="interview_mode" id="interview-mode"
+                                        class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="offline" {{ ($application->interview_mode ?? 'offline') === 'offline' ? 'selected' : '' }}>Offline (Tatap Muka)</option>
+                                        <option value="online" {{ ($application->interview_mode ?? '') === 'online' ? 'selected' : '' }}>Online (Video Call)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label id="interview-location-label" class="block text-xs text-gray-500 mb-1">
+                                        {{ ($application->interview_mode ?? 'offline') === 'online' ? 'Tautan Meeting' : 'Lokasi' }}
+                                    </label>
+                                    <input type="text" name="interview_location" id="interview-location"
                                         value="{{ $application->interview_location }}"
-                                        placeholder="Contoh: Gedung A, Lt 3 / Google Meet"
+                                        placeholder="{{ ($application->interview_mode ?? 'offline') === 'online' ? 'https://...' : 'Contoh: Gedung A, Lt 3' }}"
                                         class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                                 <div>
@@ -307,6 +317,23 @@
                                 interviewFields.classList.add('hidden');
                             }
                         });
+
+                        const modeSelect = document.getElementById('interview-mode');
+                        const locationLabel = document.getElementById('interview-location-label');
+                        const locationInput = document.getElementById('interview-location');
+
+                        function updateLocationLabel() {
+                            if (modeSelect.value === 'online') {
+                                locationLabel.textContent = 'Tautan Meeting';
+                                locationInput.placeholder = 'https://...';
+                            } else {
+                                locationLabel.textContent = 'Lokasi';
+                                locationInput.placeholder = 'Contoh: Gedung A, Lt 3';
+                            }
+                        }
+
+                        modeSelect.addEventListener('change', updateLocationLabel);
+                        updateLocationLabel();
                     </script>
                 </div>
 

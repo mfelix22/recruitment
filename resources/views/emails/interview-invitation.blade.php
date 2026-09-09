@@ -94,11 +94,20 @@
                 @endif
                 @if ($application->interview_location)
                     <div class="info-row">
-                        <span class="info-label">Lokasi</span>
+                        <span class="info-label">{{ $isOnline ? 'Tautan Meeting' : 'Lokasi' }}</span>
                         : {{ $application->interview_location }}
                     </div>
                 @endif
             </div>
+
+            @if ($isOnline && $application->interview_location)
+                <div style="text-align:center;margin:20px 0;">
+                    <a href="{{ $application->interview_location }}"
+                        style="display:inline-block;background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">
+                        Bergabung ke Interview Online
+                    </a>
+                </div>
+            @endif
 
             @if ($application->interview_notes)
                 <p><strong>Informasi tambahan:</strong></p>
@@ -107,8 +116,13 @@
                 </p>
             @endif
 
-            <p>Mohon hadir tepat waktu dan membawa dokumen identitas diri. Jika ada pertanyaan atau kendala,
-                silakan hubungi kami melalui email ini.</p>
+            @if ($isOnline)
+                <p>Harap bergabung tepat waktu, pastikan koneksi internet dan kamera/audio Anda berfungsi dengan baik.
+                    Jika ada kendala teknis, silakan hubungi kami melalui email ini.</p>
+            @else
+                <p>Mohon hadir tepat waktu dan membawa dokumen identitas diri. Jika ada pertanyaan atau kendala,
+                    silakan hubungi kami melalui email ini.</p>
+            @endif
 
             <p>Kami tunggu kehadiran Anda.</p>
 

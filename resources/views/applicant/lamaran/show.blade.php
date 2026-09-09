@@ -132,6 +132,12 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-sm">
                         <div>
+                            <p class="text-xs text-gray-400">Mode</p>
+                            <p class="text-gray-700 font-medium">
+                                {{ ($application->interview_mode ?? 'offline') === 'online' ? 'Online' : 'Offline' }}
+                            </p>
+                        </div>
+                        <div>
                             <p class="text-xs text-gray-400">Tanggal & Waktu</p>
                             <p class="text-gray-700 font-medium">
                                 {{ $application->interview_at->translatedFormat('l, d F Y') }}
@@ -146,7 +152,9 @@
                             @endif
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Lokasi / Tautan</p>
+                            <p class="text-xs text-gray-400">
+                                {{ ($application->interview_mode ?? 'offline') === 'online' ? 'Tautan Meeting' : 'Lokasi' }}
+                            </p>
                             <p class="text-gray-700">{{ $application->interview_location ?? '-' }}</p>
                         </div>
                     </div>
