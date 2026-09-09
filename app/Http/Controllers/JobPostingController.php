@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobPosting;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JobPostingController extends Controller
 {
@@ -47,6 +49,11 @@ class JobPostingController extends Controller
 
         $jobs = $query->paginate(10)->withQueryString();
 
+        /** @var User|null $user */
+        $user = Auth::user();
+        $savedIds = $user ? $user->savedJobs()->pluck('job_posting_id') : collect();
+        $appliedIds = $user ? $user->applications()->pluck('job_posting_id') : collect();
+
         // Distinct filter options taken from currently active postings
         $departments = JobPosting::active()->whereNotNull('department')
             ->distinct()->orderBy('department')->pluck('department');
@@ -60,6 +67,8 @@ class JobPostingController extends Controller
             'educationLevels'  => $this->educationLevels,
             'experienceLevels' => $this->experienceLevels,
             'employmentTypes'  => $this->employmentTypes,
+            'savedIds'         => $savedIds,
+            'appliedIds'       => $appliedIds,
         ]);
     }
 
@@ -72,13 +81,13 @@ class JobPostingController extends Controller
 
         $alreadyApplied = false;
         $isSaved = false;
-        if (auth()->check()) {
+        if (Auth::check()) {
             $alreadyApplied = $jobPosting->applications()
-                ->where('applicant_id', auth()->id())
+                ->where('applicant_id', Auth::id())
                 ->exists();
-            $isSaved = auth()->user()->savedJobs()
-                ->where('job_posting_id', $jobPosting->id)
-                ->exists();
+            /** @var User $user */
+            $user = Auth::user();
+            $isSaved = $user->savedJobs()->where('job_posting_id', $jobPosting->id)->exists();
         }
 
         return view('applicant.lowongan.show', compact('jobPosting', 'alreadyApplied', 'isSaved'));
@@ -99,7 +108,7 @@ class JobPostingController extends Controller
     /** HRD: list own job postings */
     public function employerIndex()
     {
-        $jobs = JobPosting::where('employer_id', auth()->id())
+        $jobs = JobPosting::where('employer_id', Auth::id())
             ->withCount('applications')
             ->latest()
             ->paginate(10);
@@ -135,7 +144,7 @@ class JobPostingController extends Controller
             'requirements'     => ['nullable', 'string'],
         ]);
 
-        $validated['employer_id'] = auth()->id();
+        $validated['employer_id'] = Auth::id();
         $validated['is_active']   = $request->boolean('is_active', true);
 
         JobPosting::create($validated);
