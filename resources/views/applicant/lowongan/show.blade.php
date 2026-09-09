@@ -42,16 +42,21 @@
                     {{-- Deskripsi --}}
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h2 class="font-semibold text-gray-700 mb-3">Deskripsi Pekerjaan</h2>
-                        <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                            {{ $jobPosting->job_description }}</div>
+                        <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{{ trim($jobPosting->job_description) }}</div>
                     </div>
 
                     {{-- Persyaratan --}}
                     @if ($jobPosting->requirements)
                         <div class="bg-white rounded-xl shadow-sm p-6">
                             <h2 class="font-semibold text-gray-700 mb-3">Persyaratan</h2>
-                            <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                                {{ $jobPosting->requirements }}</div>
+                            <ul class="list-disc list-inside text-sm text-gray-600 leading-relaxed space-y-1">
+                                @foreach (preg_split('/\r?\n/', $jobPosting->requirements) as $req)
+                                    @php($req = preg_replace('/^[-•*]\s*/', '', trim($req)))
+                                    @if ($req !== '')
+                                        <li>{{ $req }}</li>
+                                    @endif
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 
