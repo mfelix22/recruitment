@@ -12,12 +12,18 @@ use App\Http\Controllers\McuResultController;
 use App\Http\Controllers\SupportingDocumentController;
 use App\Http\Controllers\ApplicantDocumentController;
 use App\Http\Controllers\QuickProfileController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SavedJobController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $jobs = \App\Models\JobPosting::active()->latest()->take(6)->get();
     return view('welcome', compact('jobs'));
 });
+
+// Public job detail — shareable without login
+Route::get('/lowongan/{jobPosting}', [JobPostingController::class, 'showPublic'])->name('jobs.public');
 
 Route::get('/dashboard', function () {
     if (auth()->user()->isEmployer()) {
@@ -36,6 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notifications (shared by applicant & employer)
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifikasi/{id}/baca', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 });
 
 // ─── Applicant routes ────────────────────────────────────────────────────────
@@ -72,11 +83,14 @@ Route::middleware(['auth', 'role:applicant'])->prefix('pelamar')->name('applican
         // Lowongan (browsing is always allowed after Phase 1)
         Route::get('/lowongan', [JobPostingController::class, 'index'])->name('jobs.index');
         Route::get('/lowongan/{jobPosting}', [JobPostingController::class, 'show'])->name('jobs.show');
+        Route::post('/lowongan/{jobPosting}/simpan', [SavedJobController::class, 'toggle'])->name('jobs.save');
+        Route::get('/lowongan-tersimpan', [SavedJobController::class, 'index'])->name('jobs.saved');
 
         Route::post('/lowongan/{jobPosting}/lamar', [ApplicationController::class, 'store'])->name('apply');
 
         Route::get('/lamaran-saya', [ApplicationController::class, 'index'])->name('applications.index');
         Route::get('/lamaran-saya/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+        Route::delete('/lamaran-saya/{application}', [ApplicationController::class, 'withdraw'])->name('applications.withdraw');
 
         // Onboarding document upload
         Route::get('/lamaran-saya/{application}/onboarding', [ApplicantDocumentController::class, 'index'])->name('onboarding.index');
@@ -88,7 +102,7 @@ Route::middleware(['auth', 'role:applicant'])->prefix('pelamar')->name('applican
 // ─── Employer / HRD routes ───────────────────────────────────────────────────
 Route::middleware(['auth', 'role:employer'])->prefix('hrd')->name('employer.')->group(function () {
 
-    Route::get('/beranda', fn() => view('hrd.dashboard'))->name('dashboard');
+    Route::get('/beranda', [DashboardController::class, 'employer'])->name('dashboard');
 
     // Kelola lowongan
     Route::get('/lowongan', [JobPostingController::class, 'employerIndex'])->name('lowongan.index');
@@ -101,6 +115,7 @@ Route::middleware(['auth', 'role:employer'])->prefix('hrd')->name('employer.')->
     // Lihat & kelola lamaran masuk
     Route::get('/lamaran', [ApplicationController::class, 'employerIndex'])->name('applications.index');
     Route::get('/lamaran/kanban', [ApplicationController::class, 'kanban'])->name('applications.kanban');
+    Route::get('/lamaran/export', [ApplicationController::class, 'exportExcel'])->name('applications.export');
     Route::get('/lamaran/{application}', [ApplicationController::class, 'employerShow'])->name('applications.show');
     Route::get('/lamaran/{application}/pdf', [ApplicationController::class, 'downloadPdf'])->name('applications.pdf');
     Route::patch('/lamaran/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');

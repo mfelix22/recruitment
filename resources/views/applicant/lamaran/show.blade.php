@@ -119,6 +119,47 @@
                 @endif
             </div>
 
+            {{-- Interview details --}}
+            @if ($application->interview_at)
+                <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="text-sm font-semibold text-gray-700">Jadwal Interview</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-sm">
+                        <div>
+                            <p class="text-xs text-gray-400">Tanggal & Waktu</p>
+                            <p class="text-gray-700 font-medium">
+                                {{ $application->interview_at->translatedFormat('l, d F Y') }}
+                                <span class="text-gray-500">pukul {{ $application->interview_at->format('H:i') }}</span>
+                            </p>
+                            @if ($application->interview_at->isFuture())
+                                <p class="text-xs text-blue-500 mt-0.5">
+                                    {{ $application->interview_at->diffForHumans() }}
+                                </p>
+                            @else
+                                <p class="text-xs text-gray-400 mt-0.5">Jadwal telah lewat</p>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Lokasi / Tautan</p>
+                            <p class="text-gray-700">{{ $application->interview_location ?? '-' }}</p>
+                        </div>
+                    </div>
+
+                    @if ($application->interview_notes)
+                        <div class="mt-3 bg-blue-50 rounded-lg px-4 py-3">
+                            <p class="text-xs font-medium text-blue-600 mb-1">Catatan Interview</p>
+                            <p class="text-sm text-blue-700 leading-relaxed whitespace-pre-wrap">{{ trim($application->interview_notes) }}</p>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- Job info --}}
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <h3 class="text-sm font-semibold text-gray-700 mb-3">Detail Lowongan</h3>
@@ -174,6 +215,29 @@
                     <h3 class="text-sm font-semibold text-blue-700 mb-2">Catatan dari HRD</h3>
                     <p class="text-sm text-blue-700 leading-relaxed whitespace-pre-wrap">
                         {{ $application->employer_notes }}</p>
+                </div>
+            @endif
+
+            {{-- Withdraw application --}}
+            @if (in_array($application->status, ['Menunggu', 'Sedang Ditinjau'], true))
+                <div class="bg-white rounded-xl shadow-sm p-5">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-700">Batalkan Lamaran</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                Lamaran yang dibatalkan akan dihapus dan Anda dapat melamar kembali.
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('applicant.applications.withdraw', $application) }}"
+                            onsubmit="return confirm('Yakin ingin membatalkan lamaran ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="text-sm text-red-600 hover:text-red-800 font-medium border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg transition flex-shrink-0">
+                                Batalkan Lamaran
+                            </button>
+                        </form>
+                    </div>
                 </div>
             @endif
 

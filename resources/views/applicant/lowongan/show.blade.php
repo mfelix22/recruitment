@@ -149,6 +149,22 @@
                                 </button>
                             </form>
                         @endif
+
+                        <form action="{{ route('applicant.jobs.save', $jobPosting) }}" method="POST" class="mt-2">
+                            @csrf
+                            <button type="submit"
+                                class="w-full text-sm font-medium py-2 rounded-lg border transition inline-flex items-center justify-center gap-1.5
+                                {{ $isSaved
+                                    ? 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                    : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">
+                                <svg class="w-4 h-4" fill="{{ $isSaved ? 'currentColor' : 'none' }}"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                {{ $isSaved ? 'Tersimpan' : 'Simpan Lowongan' }}
+                            </button>
+                        </form>
                     </div>
 
                 </div>

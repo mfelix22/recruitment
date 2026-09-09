@@ -9,9 +9,13 @@ use App\Mail\McuInvitationMail;
 use App\Mail\OnboardingInvitationMail;
 use App\Mail\InterviewInvitationMail;
 use App\Http\Controllers\McuResultController;
+use App\Exports\ApplicationsExport;
+use App\Notifications\ApplicationStatusUpdated;
+use App\Notifications\NewApplicationReceived;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ApplicationController extends Controller
 {
@@ -66,15 +70,37 @@ class ApplicationController extends Controller
             'cover_letter' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        Application::create([
+        $application = Application::create([
             'applicant_id'   => auth()->id(),
             'job_posting_id' => $jobPosting->id,
             'cover_letter'   => $validated['cover_letter'] ?? null,
             'status'         => 'Menunggu',
         ]);
 
+        try {
+            $jobPosting->loadMissing('employer');
+            $jobPosting->employer?->notify(new NewApplicationReceived($application->load('applicant', 'jobPosting')));
+        } catch (\Exception $e) {
+            logger()->error('New application notification failed: ' . $e->getMessage());
+        }
+
         return redirect()->route('applicant.applications.index')
             ->with('success', 'Lamaran berhasil dikirim! Kami akan menghubungi Anda.');
+    }
+
+    /** Applicant: withdraw own application (before it enters interview stage) */
+    public function withdraw(Application $application)
+    {
+        $this->authorize('withdraw', $application);
+
+        if (! in_array($application->status, ['Menunggu', 'Sedang Ditinjau'], true)) {
+            return back()->with('error', 'Lamaran tidak dapat dibatalkan karena sudah diproses lebih lanjut.');
+        }
+
+        $application->delete();
+
+        return redirect()->route('applicant.applications.index')
+            ->with('success', 'Lamaran berhasil dibatalkan.');
     }
 
     // ─── HRD methods ──────────────────────────────────────────────────────────
@@ -102,6 +128,21 @@ class ApplicationController extends Controller
         $statuses = Application::STATUSES;
 
         return view('hrd.lamaran.index', compact('applications', 'myJobs', 'statuses'));
+    }
+
+    /** HRD: export applications to Excel (respects current filters) */
+    public function exportExcel(Request $request)
+    {
+        $filename = 'lamaran-' . now()->format('Ymd-His') . '.xlsx';
+
+        return Excel::download(
+            new ApplicationsExport(
+                employerId: auth()->id(),
+                jobPostingId: $request->filled('lowongan') ? (int) $request->lowongan : null,
+                status: $request->filled('status') ? $request->status : null,
+            ),
+            $filename
+        );
     }
 
     /** HRD: view applicant detail */
@@ -143,6 +184,11 @@ class ApplicationController extends Controller
 
         // Send notification emails on key status changes
         try {
+            $application->loadMissing('applicant', 'jobPosting');
+            $application->applicant?->notify(
+                new ApplicationStatusUpdated($application, $validated['status'])
+            );
+
             if ($validated['status'] === 'Dipanggil Interview' && ! empty($validated['interview_at'])) {
                 Mail::to($application->applicant->email)
                     ->send(new InterviewInvitationMail($application));
@@ -181,6 +227,11 @@ class ApplicationController extends Controller
         }
 
         try {
+            $application->loadMissing('applicant', 'jobPosting');
+            $application->applicant?->notify(
+                new ApplicationStatusUpdated($application, $validated['status'])
+            );
+
             if ($validated['status'] === 'Menunggu MCU') {
                 Mail::to($application->applicant->email)->send(new McuInvitationMail($application));
             }

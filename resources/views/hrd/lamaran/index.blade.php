@@ -33,6 +33,14 @@
                 class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition">
                 Terapkan
             </button>
+            <a href="{{ route('employer.applications.export', request()->only(['lowongan', 'status'])) }}"
+                class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4" />
+                </svg>
+                Export Excel
+            </a>
             @if (request()->hasAny(['lowongan', 'status']))
                 <a href="{{ route('employer.applications.index') }}"
                     class="text-sm text-gray-500 hover:text-gray-700 py-2">Reset</a>

@@ -18,31 +18,75 @@
 
             {{-- Search / filter --}}
             <form method="GET" action="{{ route('applicant.jobs.index') }}"
-                class="bg-white rounded-xl shadow-sm p-4 flex flex-col sm:flex-row gap-3">
-                <input type="text" name="cari" value="{{ request('cari') }}"
-                    placeholder="Cari posisi, departemen, atau lokasi..."
-                    class="flex-1 rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                class="bg-white rounded-xl shadow-sm p-4 space-y-3">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" name="cari" value="{{ request('cari') }}"
+                        placeholder="Cari posisi, departemen, atau lokasi..."
+                        class="flex-1 rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
 
-                <select name="jenis"
-                    class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Semua Jenis</option>
-                    @foreach (['Full Time', 'Part Time', 'Kontrak', 'Magang', 'Freelance'] as $type)
-                        <option value="{{ $type }}" {{ request('jenis') === $type ? 'selected' : '' }}>
-                            {{ $type }}
-                        </option>
-                    @endforeach
-                </select>
+                    <button type="submit"
+                        class="bg-blue-600 text-white text-sm px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Cari
+                    </button>
+                    @if (request()->hasAny(['cari', 'jenis', 'departemen', 'lokasi', 'pendidikan', 'pengalaman']))
+                        <a href="{{ route('applicant.jobs.index') }}"
+                            class="text-sm text-gray-400 hover:text-gray-600 self-center">
+                            Reset
+                        </a>
+                    @endif
+                </div>
 
-                <button type="submit"
-                    class="bg-blue-600 text-white text-sm px-5 py-2 rounded-lg hover:bg-blue-700 transition">
-                    Cari
-                </button>
-                @if (request()->hasAny(['cari', 'jenis']))
-                    <a href="{{ route('applicant.jobs.index') }}"
-                        class="text-sm text-gray-400 hover:text-gray-600 self-center">
-                        Reset
-                    </a>
-                @endif
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <select name="jenis"
+                        class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Semua Jenis</option>
+                        @foreach ($employmentTypes as $type)
+                            <option value="{{ $type }}" {{ request('jenis') === $type ? 'selected' : '' }}>
+                                {{ $type }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="departemen"
+                        class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Semua Departemen</option>
+                        @foreach ($departments as $dept)
+                            <option value="{{ $dept }}" {{ request('departemen') === $dept ? 'selected' : '' }}>
+                                {{ $dept }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="lokasi"
+                        class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Semua Lokasi</option>
+                        @foreach ($locations as $loc)
+                            <option value="{{ $loc }}" {{ request('lokasi') === $loc ? 'selected' : '' }}>
+                                {{ $loc }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="pendidikan"
+                        class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Min. Pendidikan</option>
+                        @foreach ($educationLevels as $edu)
+                            <option value="{{ $edu }}" {{ request('pendidikan') === $edu ? 'selected' : '' }}>
+                                {{ $edu }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="pengalaman"
+                        class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Semua Level</option>
+                        @foreach ($experienceLevels as $level)
+                            <option value="{{ $level }}" {{ request('pengalaman') === $level ? 'selected' : '' }}>
+                                {{ $level }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </form>
 
             {{-- Result count --}}

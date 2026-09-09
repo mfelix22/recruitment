@@ -29,9 +29,38 @@ class JobPostingController extends Controller
             $query->where('employment_type', $request->jenis);
         }
 
+        if ($request->filled('departemen')) {
+            $query->where('department', $request->departemen);
+        }
+
+        if ($request->filled('lokasi')) {
+            $query->where('location', $request->lokasi);
+        }
+
+        if ($request->filled('pendidikan')) {
+            $query->where('min_education', $request->pendidikan);
+        }
+
+        if ($request->filled('pengalaman')) {
+            $query->where('experience_level', $request->pengalaman);
+        }
+
         $jobs = $query->paginate(10)->withQueryString();
 
-        return view('applicant.lowongan.index', compact('jobs'));
+        // Distinct filter options taken from currently active postings
+        $departments = JobPosting::active()->whereNotNull('department')
+            ->distinct()->orderBy('department')->pluck('department');
+        $locations = JobPosting::active()->whereNotNull('location')
+            ->distinct()->orderBy('location')->pluck('location');
+
+        return view('applicant.lowongan.index', [
+            'jobs'             => $jobs,
+            'departments'      => $departments,
+            'locations'        => $locations,
+            'educationLevels'  => $this->educationLevels,
+            'experienceLevels' => $this->experienceLevels,
+            'employmentTypes'  => $this->employmentTypes,
+        ]);
     }
 
     /** Applicant: view single job */
@@ -42,13 +71,27 @@ class JobPostingController extends Controller
         }
 
         $alreadyApplied = false;
+        $isSaved = false;
         if (auth()->check()) {
             $alreadyApplied = $jobPosting->applications()
                 ->where('applicant_id', auth()->id())
                 ->exists();
+            $isSaved = auth()->user()->savedJobs()
+                ->where('job_posting_id', $jobPosting->id)
+                ->exists();
         }
 
-        return view('applicant.lowongan.show', compact('jobPosting', 'alreadyApplied'));
+        return view('applicant.lowongan.show', compact('jobPosting', 'alreadyApplied', 'isSaved'));
+    }
+
+    /** Public: shareable job detail page (no login required) */
+    public function showPublic(JobPosting $jobPosting)
+    {
+        if (! $jobPosting->is_active) {
+            abort(404);
+        }
+
+        return view('lowongan.public', compact('jobPosting'));
     }
 
     // ─── HRD methods ──────────────────────────────────────────────────────────

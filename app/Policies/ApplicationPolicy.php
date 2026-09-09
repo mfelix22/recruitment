@@ -12,6 +12,11 @@ class ApplicationPolicy
         return $user->id === $application->applicant_id;
     }
 
+    public function withdraw(User $user, Application $application): bool
+    {
+        return $user->id === $application->applicant_id;
+    }
+
     public function viewEmployer(User $user, Application $application): bool
     {
         return $user->id === $application->jobPosting->employer_id;

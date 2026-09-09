@@ -154,19 +154,10 @@
                                 </div>
                             @endif
                         </div>
-                        @auth
-                            @if (!auth()->user()->isEmployer())
-                                <a href="{{ route('applicant.jobs.show', $job) }}"
-                                    class="block text-center text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
-                                    Lihat Detail
-                                </a>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}"
-                                class="block text-center text-sm font-medium border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg transition">
-                                Masuk untuk melamar
-                            </a>
-                        @endauth
+                        <a href="{{ route('jobs.public', $job) }}"
+                            class="block text-center text-sm font-medium {{ auth()->check() && auth()->user()->isApplicant() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'border border-blue-600 text-blue-600 hover:bg-blue-50' }} px-4 py-2 rounded-lg transition">
+                            Lihat Detail
+                        </a>
                     </div>
                 @endforeach
             </div>

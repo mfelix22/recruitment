@@ -116,6 +116,7 @@
                     {{ $heading ?? 'Dashboard HRD' }}
                 </h2>
                 <div class="flex items-center gap-4">
+                    <x-notification-bell />
                     <span class="text-sm text-gray-500">{{ now()->translatedFormat('l, d F Y') }}</span>
                     <span class="text-gray-300">|</span>
                     <div class="flex items-center gap-2">
