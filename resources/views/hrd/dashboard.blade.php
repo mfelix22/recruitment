@@ -93,6 +93,86 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            {{-- Calendar --}}
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+                <h3 class="font-semibold text-gray-800 mb-4">Kalender — {{ now()->translatedFormat('F Y') }}</h3>
+                <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-400 mb-2">
+                    @foreach (['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $d)
+                        <div class="py-1">{{ $d }}</div>
+                    @endforeach
+                </div>
+                <div class="grid grid-cols-7 gap-1">
+                    @foreach ($calendar as $week)
+                        @foreach ($week as $day)
+                            <div
+                                class="min-h-[4.5rem] rounded-lg p-1.5
+                                {{ $day['inMonth'] ? 'bg-gray-50' : '' }}
+                                {{ $day['isToday'] ? 'ring-2 ring-blue-500' : '' }}">
+                                <span
+                                    class="text-xs {{ $day['isToday'] ? 'font-bold text-blue-600' : ($day['inMonth'] ? 'text-gray-700' : 'text-gray-300') }}">
+                                    {{ $day['date']->day }}
+                                </span>
+                                <div class="mt-0.5 space-y-0.5">
+                                    @foreach ($day['events']->take(2) as $event)
+                                        <a href="{{ $event['url'] }}"
+                                            class="block truncate rounded px-1 py-0.5 text-[10px] font-medium
+                                            {{ $event['type'] === 'interview' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-red-100 text-red-700 hover:bg-red-200' }}">
+                                            {{ $event['time'] ? $event['time'] . ' ' : '' }}{{ $event['label'] }}
+                                        </a>
+                                    @endforeach
+                                    @if ($day['events']->count() > 2)
+                                        <p class="text-[10px] text-gray-400 px-1">+{{ $day['events']->count() - 2 }}
+                                            lainnya</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @endforeach
+                </div>
+                <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-blue-500"></span>
+                        Interview</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-red-400"></span> Batas
+                        lowongan</span>
+                </div>
+            </div>
+
+            {{-- Agenda --}}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="font-semibold text-gray-800">Agenda 7 Hari ke Depan</h3>
+                </div>
+                @if ($agenda->isEmpty())
+                    <p class="px-6 py-10 text-center text-gray-400 text-sm">Tidak ada agenda.</p>
+                @else
+                    <div class="divide-y divide-gray-50">
+                        @foreach ($agenda as $event)
+                            <a href="{{ $event['url'] }}"
+                                class="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 transition">
+                                <div class="shrink-0 w-10 text-center">
+                                    <p class="text-sm font-bold text-gray-800">{{ $event['date']->format('d') }}</p>
+                                    <p class="text-[10px] text-gray-400 uppercase">
+                                        {{ $event['date']->translatedFormat('M') }}</p>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-gray-800 truncate">
+                                        {{ $event['type'] === 'interview' ? 'Interview: ' : 'Batas: ' }}{{ $event['label'] }}
+                                    </p>
+                                    <p class="text-xs text-gray-400 truncate">
+                                        {{ $event['time'] ? $event['time'] . ' · ' : '' }}{{ $event['sub'] }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="ml-auto shrink-0 w-2 h-2 rounded-full {{ $event['type'] === 'interview' ? 'bg-blue-500' : 'bg-red-400' }}"></span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- Recent Applications --}}
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">

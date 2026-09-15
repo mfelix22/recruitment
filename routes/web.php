@@ -78,7 +78,7 @@ Route::middleware(['auth', 'role:applicant'])->prefix('pelamar')->name('applican
 
     // ── All other pages require Phase 1 to be complete ──────────────────────
     Route::middleware('basic.complete')->group(function () {
-        Route::get('/beranda', fn() => view('applicant.dashboard'))->name('dashboard');
+        Route::get('/beranda', [DashboardController::class, 'applicant'])->name('dashboard');
 
         // Lowongan (browsing is always allowed after Phase 1)
         Route::get('/lowongan', [JobPostingController::class, 'index'])->name('jobs.index');
