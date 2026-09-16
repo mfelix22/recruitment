@@ -114,9 +114,11 @@
 
                         {{-- Marital Status --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Status Perkawinan</label>
-                            <select name="marital_status"
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Status Perkawinan <span class="text-red-500">*</span>
+                            </label>
+                            <select name="marital_status" required
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('marital_status') border-red-400 @enderror">
                                 <option value="">-- Pilih --</option>
                                 @foreach (['Belum Menikah', 'Menikah', 'Cerai Hidup', 'Cerai Mati'] as $ms)
                                     <option value="{{ $ms }}"
@@ -124,6 +126,9 @@
                                         {{ $ms }}</option>
                                 @endforeach
                             </select>
+                            @error('marital_status')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Place of Birth --}}
@@ -156,9 +161,11 @@
 
                         {{-- Religion --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Agama</label>
-                            <select name="religion"
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Agama <span class="text-red-500">*</span>
+                            </label>
+                            <select name="religion" required
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('religion') border-red-400 @enderror">
                                 <option value="">-- Pilih --</option>
                                 @foreach ($religions as $r)
                                     <option value="{{ $r }}"
@@ -166,13 +173,18 @@
                                         {{ $r }}</option>
                                 @endforeach
                             </select>
+                            @error('religion')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Province --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Provinsi</label>
-                            <select name="province"
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Provinsi <span class="text-red-500">*</span>
+                            </label>
+                            <select name="province" required
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('province') border-red-400 @enderror">
                                 <option value="">-- Pilih --</option>
                                 @foreach ($provinces as $p)
                                     <option value="{{ $p }}"
@@ -180,24 +192,37 @@
                                         {{ $p }}</option>
                                 @endforeach
                             </select>
+                            @error('province')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- City/Kabupaten --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Kota / Kabupaten</label>
-                            <input type="text" name="kabupaten"
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Kota / Kabupaten <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="kabupaten" required
                                 value="{{ old('kabupaten', $profile?->address?->kabupaten) }}"
                                 placeholder="Contoh: Kota Surabaya"
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('kabupaten') border-red-400 @enderror">
+                            @error('kabupaten')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Street --}}
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Alamat</label>
-                            <input type="text" name="street"
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Alamat <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="street" required
                                 value="{{ old('street', $profile?->address?->street) }}"
                                 placeholder="Nama jalan, nomor rumah"
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('street') border-red-400 @enderror">
+                            @error('street')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                     </div>
@@ -322,37 +347,98 @@
 
                             {{-- Company --}}
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Nama Perusahaan</label>
-                                <input type="text" name="work_company"
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Nama Perusahaan <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="work_company" data-work-required
                                     value="{{ old('work_company', $existingWork?->company) }}"
                                     placeholder="Contoh: PT. Contoh Indonesia"
-                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_company') border-red-400 @enderror">
+                                @error('work_company')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             {{-- Position --}}
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Jabatan / Posisi</label>
-                                <input type="text" name="work_position"
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Jabatan / Posisi <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="work_position" data-work-required
                                     value="{{ old('work_position', $existingWork?->position) }}"
                                     placeholder="Contoh: Staff Administrasi"
-                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_position') border-red-400 @enderror">
+                                @error('work_position')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Job Description --}}
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Job Desk / Deskripsi Pekerjaan <span class="text-red-500">*</span>
+                                </label>
+                                <textarea name="work_job_description" rows="2" data-work-required
+                                    placeholder="Jelaskan tugas dan tanggung jawab utama Anda"
+                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_job_description') border-red-400 @enderror">{{ old('work_job_description', $existingWork?->job_description) }}</textarea>
+                                @error('work_job_description')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             {{-- Start Date --}}
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Mulai Bekerja</label>
-                                <input type="date" name="work_start_date"
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Mulai Bekerja <span class="text-red-500">*</span>
+                                </label>
+                                <input type="date" name="work_start_date" data-work-required
                                     value="{{ old('work_start_date', $existingWork?->start_date?->format('Y-m-d')) }}"
-                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_start_date') border-red-400 @enderror">
+                                @error('work_start_date')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
-                            {{-- End Date --}}
+                            {{-- End Date / Still Working --}}
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Selesai Bekerja</label>
-                                <input type="date" name="work_end_date"
-                                    value="{{ old('work_end_date', $existingWork?->end_date?->format('Y-m-d')) }}"
-                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
-                                <p class="text-xs text-gray-400 mt-1">Kosongkan jika masih bekerja</p>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Selesai Bekerja <span class="text-red-500">*</span>
+                                </label>
+                                <div id="work-end-wrap"
+                                    class="{{ old('work_still_here', $existingWork?->still_working) ? 'hidden' : '' }}">
+                                    <input type="date" name="work_end_date" id="work-end-date"
+                                        value="{{ old('work_end_date', $existingWork?->end_date?->format('Y-m-d')) }}"
+                                        class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_end_date') border-red-400 @enderror">
+                                    @error('work_end_date')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div id="work-present-label"
+                                    class="{{ old('work_still_here', $existingWork?->still_working) ? '' : 'hidden' }} w-full rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-500 px-3 py-2">
+                                    Present
+                                </div>
+                                <label class="flex items-center gap-2 mt-2 cursor-pointer">
+                                    <input type="checkbox" name="work_still_here" value="1" id="work-still-here"
+                                        {{ old('work_still_here', $existingWork?->still_working) ? 'checked' : '' }}
+                                        class="rounded text-blue-600 focus:ring-blue-500"
+                                        onchange="toggleStillWorking()">
+                                    <span class="text-xs text-gray-600">Saya masih bekerja di sini</span>
+                                </label>
+                            </div>
+
+                            {{-- Reason for leaving (only when not still working) --}}
+                            <div class="sm:col-span-2 {{ old('work_still_here', $existingWork?->still_working) ? 'hidden' : '' }}"
+                                id="work-reason-wrap">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Alasan Keluar dari Pekerjaan Sebelumnya <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="work_reason_for_leaving" id="work-reason"
+                                    value="{{ old('work_reason_for_leaving', $existingWork?->reason_for_leaving) }}"
+                                    placeholder="Contoh: Kontrak berakhir, resign untuk melanjutkan studi"
+                                    class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 @error('work_reason_for_leaving') border-red-400 @enderror">
+                                @error('work_reason_for_leaving')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                         </div>
@@ -387,14 +473,38 @@
             function toggleWorkFields(value) {
                 const fields = document.getElementById('work-fields');
                 const freshMsg = document.getElementById('fresh-msg');
-                if (value === 'fresh_graduate') {
-                    fields.classList.add('hidden');
-                    freshMsg.classList.remove('hidden');
-                } else {
-                    fields.classList.remove('hidden');
-                    freshMsg.classList.add('hidden');
-                }
+                const experienced = value === 'has_experience';
+
+                fields.classList.toggle('hidden', !experienced);
+                freshMsg.classList.toggle('hidden', experienced);
+                fields.querySelectorAll('[data-work-required]').forEach(el => el.required = experienced);
+
+                toggleStillWorking();
             }
+
+            function toggleStillWorking() {
+                const experienced = document.getElementById('radio-exp').checked;
+                const still = document.getElementById('work-still-here').checked;
+                const endWrap = document.getElementById('work-end-wrap');
+                const endInput = document.getElementById('work-end-date');
+                const presentLabel = document.getElementById('work-present-label');
+                const reasonWrap = document.getElementById('work-reason-wrap');
+                const reasonInput = document.getElementById('work-reason');
+
+                endWrap.classList.toggle('hidden', still);
+                presentLabel.classList.toggle('hidden', !still);
+                endInput.disabled = still;
+                endInput.required = experienced && !still;
+
+                reasonWrap.classList.toggle('hidden', still);
+                reasonInput.disabled = still;
+                reasonInput.required = experienced && !still;
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleWorkFields(document.querySelector('input[name="work_status"]:checked')?.value ||
+                    'fresh_graduate');
+            });
         </script>
     @endpush
 </x-layouts.applicant>

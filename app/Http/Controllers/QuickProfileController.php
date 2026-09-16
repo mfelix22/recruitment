@@ -40,12 +40,12 @@ class QuickProfileController extends Controller
             'gender'         => ['required', 'in:Laki-laki,Perempuan'],
             'place_of_birth' => ['required', 'string', 'max:100'],
             'date_of_birth'  => ['required', 'date', 'before:today'],
-            'religion'       => ['nullable', 'string', 'max:30'],
-            'marital_status' => ['nullable', 'in:Belum Menikah,Menikah,Cerai Hidup,Cerai Mati'],
+            'religion'       => ['required', 'string', 'max:30'],
+            'marital_status' => ['required', 'in:Belum Menikah,Menikah,Cerai Hidup,Cerai Mati'],
             // Address
-            'street'         => ['nullable', 'string', 'max:255'],
-            'province'       => ['nullable', 'string', 'max:100'],
-            'kabupaten'      => ['nullable', 'string', 'max:100'],
+            'street'         => ['required', 'string', 'max:255'],
+            'province'       => ['required', 'string', 'max:100'],
+            'kabupaten'      => ['required', 'string', 'max:100'],
             // Education (required at least 1)
             'edu_level'      => ['required', 'in:' . implode(',', $this->educationLevels)],
             'edu_institution' => ['required', 'string', 'max:255'],
@@ -56,10 +56,22 @@ class QuickProfileController extends Controller
             // Work status
             'work_status'    => ['required', 'in:fresh_graduate,has_experience'],
             // Work experience (only validated when has_experience)
-            'work_company'   => ['nullable', 'string', 'max:255'],
-            'work_position'  => ['nullable', 'string', 'max:100'],
-            'work_start_date' => ['nullable', 'date'],
-            'work_end_date'  => ['nullable', 'date'],
+            'work_company'   => ['required_if:work_status,has_experience', 'nullable', 'string', 'max:255'],
+            'work_position'  => ['required_if:work_status,has_experience', 'nullable', 'string', 'max:100'],
+            'work_start_date' => ['required_if:work_status,has_experience', 'nullable', 'date'],
+            'work_still_here' => ['nullable', 'boolean'],
+            'work_end_date'  => [
+                'nullable',
+                'date',
+                Rule::requiredIf(fn() => $request->input('work_status') === 'has_experience' && ! $request->boolean('work_still_here')),
+            ],
+            'work_job_description'    => ['required_if:work_status,has_experience', 'nullable', 'string'],
+            'work_reason_for_leaving' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::requiredIf(fn() => $request->input('work_status') === 'has_experience' && ! $request->boolean('work_still_here')),
+            ],
         ]);
 
         // ── 1. Save / update ApplicantProfile ────────────────────────────────
@@ -71,22 +83,20 @@ class QuickProfileController extends Controller
                 'gender'         => $validated['gender'],
                 'place_of_birth' => $validated['place_of_birth'],
                 'date_of_birth'  => $validated['date_of_birth'],
-                'religion'       => $validated['religion'] ?? null,
-                'marital_status' => $validated['marital_status'] ?? null,
+                'religion'       => $validated['religion'],
+                'marital_status' => $validated['marital_status'],
             ]
         );
 
-        // ── 2. Save address (if any address field provided) ──────────────────
-        if ($validated['street'] || $validated['province'] || $validated['kabupaten']) {
-            $profile->address()->updateOrCreate(
-                ['applicant_profile_id' => $profile->id],
-                [
-                    'street'    => $validated['street'] ?? null,
-                    'province'  => $validated['province'] ?? null,
-                    'kabupaten' => $validated['kabupaten'] ?? null,
-                ]
-            );
-        }
+        // ── 2. Save address ──────────────────────────────────────────────────
+        $profile->address()->updateOrCreate(
+            ['applicant_profile_id' => $profile->id],
+            [
+                'street'    => $validated['street'],
+                'province'  => $validated['province'],
+                'kabupaten' => $validated['kabupaten'],
+            ]
+        );
 
         // ── 3. Save education (create only if none exists yet) ───────────────
         if (! $profile->educations()->exists()) {
@@ -101,16 +111,20 @@ class QuickProfileController extends Controller
             ]);
         }
 
-        // ── 4. Save work experience (only if has_experience and company given) ──
+        // ── 4. Save work experience (only if has_experience and none exists) ──
         $isFreshGraduate = $validated['work_status'] === 'fresh_graduate';
+        $stillWorking    = $request->boolean('work_still_here');
 
-        if (! $isFreshGraduate && ! empty($validated['work_company']) && ! $profile->workExperiences()->exists()) {
+        if (! $isFreshGraduate && ! $profile->workExperiences()->exists()) {
             WorkExperience::create([
                 'applicant_profile_id' => $profile->id,
                 'company'              => $validated['work_company'],
                 'position'             => $validated['work_position'] ?? null,
                 'start_date'           => $validated['work_start_date'] ?? null,
-                'end_date'             => $validated['work_end_date'] ?? null,
+                'end_date'             => $stillWorking ? null : ($validated['work_end_date'] ?? null),
+                'still_working'        => $stillWorking,
+                'job_description'      => $validated['work_job_description'] ?? null,
+                'reason_for_leaving'   => $stillWorking ? null : ($validated['work_reason_for_leaving'] ?? null),
             ]);
         }
 
