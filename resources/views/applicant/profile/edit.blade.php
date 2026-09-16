@@ -755,7 +755,8 @@
                         // If no saved value and no work experience, still default to NOT fresh grad
                         // so the work experience essay questions are visible unless user opts out.
                         $freshGradSaved = $profile?->fresh_graduate ?? null;
-                        $isFreshGrad = (int) old('fresh_graduate', $freshGradSaved ?? 0) === 1;
+                        $hasWorkExp = (bool) $profile?->workExperiences->count();
+                        $isFreshGrad = !$hasWorkExp && (int) old('fresh_graduate', $freshGradSaved ?? 0) === 1;
                     @endphp
 
                     <div>
@@ -786,16 +787,30 @@
                                     class="text-indigo-600 hover:underline">Tambah di sini</a>.</p>
                         @endif
 
-                        {{-- Fresh graduate toggle — always visible --}}
-                        <div class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                        {{-- Fresh graduate toggle — disabled when work history exists --}}
+                        @if ($hasWorkExp)
                             <input type="hidden" name="fresh_graduate" value="0">
-                            <input type="checkbox" name="fresh_graduate" value="1" id="fresh-grad-check"
-                                @checked($isFreshGrad) onchange="toggleWorkEssays(this.checked)"
-                                class="w-4 h-4 text-indigo-600 border-gray-300 rounded">
-                            <label for="fresh-grad-check" class="text-sm text-blue-800 font-medium">
-                                Saya Fresh Graduate / tidak memiliki pengalaman kerja yang relevan
-                            </label>
-                        </div>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                <input type="checkbox" disabled
+                                    class="w-4 h-4 text-gray-300 border-gray-300 rounded cursor-not-allowed">
+                                <span class="text-sm text-gray-400 font-medium">
+                                    Saya Fresh Graduate / tidak memiliki pengalaman kerja yang relevan
+                                    <span class="block text-xs font-normal">Tidak tersedia — Anda sudah memiliki
+                                        riwayat pekerjaan. Hapus riwayat pekerjaan terlebih dahulu jika ingin
+                                        memilih opsi ini.</span>
+                                </span>
+                            </div>
+                        @else
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                <input type="hidden" name="fresh_graduate" value="0">
+                                <input type="checkbox" name="fresh_graduate" value="1" id="fresh-grad-check"
+                                    @checked($isFreshGrad) onchange="toggleWorkEssays(this.checked)"
+                                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded">
+                                <label for="fresh-grad-check" class="text-sm text-blue-800 font-medium">
+                                    Saya Fresh Graduate / tidak memiliki pengalaman kerja yang relevan
+                                </label>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Essay D — shown when NOT fresh graduate --}}

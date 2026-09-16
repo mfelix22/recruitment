@@ -115,7 +115,9 @@ class QuickProfileController extends Controller
         $isFreshGraduate = $validated['work_status'] === 'fresh_graduate';
         $stillWorking    = $request->boolean('work_still_here');
 
-        if (! $isFreshGraduate && ! $profile->workExperiences()->exists()) {
+        if ($isFreshGraduate) {
+            $profile->workExperiences()->delete();
+        } elseif (! $profile->workExperiences()->exists()) {
             WorkExperience::create([
                 'applicant_profile_id' => $profile->id,
                 'company'              => $validated['work_company'],
